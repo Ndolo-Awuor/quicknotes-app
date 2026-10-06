@@ -3,6 +3,9 @@ const form = document.querySelector("#note-form");
 const input = document.querySelector("#note-input");
 const categorySelect = document.querySelector("#note-category");
 const list = document.querySelector("#notes-list");
+const count = document.querySelector("#note-count");
+const errorMessage = document.querySelector("#error-message");
+const clearAllButton = document.querySelector("#clear-all");
 
 const CATEGORY_LABELS = {
   personal: "Personal",
@@ -42,6 +45,7 @@ function render() {
     deleteButton.classList.add("delete-btn");
     deleteButton.textContent = "Delete";
     deleteButton.setAttribute("aria-label", `Delete note: ${note.text}`);
+    deleteButton.addEventListener("click", () => deleteNote(note.id));
 
     metadata.appendChild(category);
     metadata.appendChild(date);
@@ -51,6 +55,16 @@ function render() {
     card.appendChild(deleteButton);
     list.appendChild(card);
   });
+
+  if (notes.length === 0) {
+    count.textContent = "You have no notes yet.";
+  } else if (notes.length === 1) {
+    count.textContent = "You have 1 note.";
+  } else {
+    count.textContent = `You have ${notes.length} notes.`;
+  }
+
+  clearAllButton.disabled = notes.length === 0;
 }
 
 function addNote(text, category) {
@@ -72,11 +86,42 @@ function addNote(text, category) {
   render();
 }
 
+function deleteNote(id) {
+  notes = notes.filter((note) => note.id !== id);
+  render();
+}
+
 form.addEventListener("submit", (event) => {
   event.preventDefault();
-  addNote(input.value.trim(), categorySelect.value);
+  const text = input.value.trim();
+
+  if (text === "") {
+    errorMessage.textContent = "Please type a note first.";
+    input.setAttribute("aria-invalid", "true");
+    input.focus();
+    return;
+  }
+
+  if (text.length > 200) {
+    errorMessage.textContent = "Notes must be 200 characters or fewer.";
+    input.setAttribute("aria-invalid", "true");
+    input.focus();
+    return;
+  }
+
+  errorMessage.textContent = "";
+  input.removeAttribute("aria-invalid");
+  addNote(text, categorySelect.value);
   input.value = "";
   input.focus();
+});
+
+// Bonus: cancel leaves every note in place; confirmation deletes them all.
+clearAllButton.addEventListener("click", () => {
+  if (confirm("Delete all notes?")) {
+    notes = [];
+    render();
+  }
 });
 
 render();
