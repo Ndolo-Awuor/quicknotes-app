@@ -6,6 +6,9 @@ const list = document.querySelector("#notes-list");
 const count = document.querySelector("#note-count");
 const errorMessage = document.querySelector("#error-message");
 const clearAllButton = document.querySelector("#clear-all");
+const searchInput = document.querySelector("#search-input");
+
+const STORAGE_KEY = "quicknotes-app";
 
 const CATEGORY_LABELS = {
   personal: "Personal",
@@ -13,12 +16,26 @@ const CATEGORY_LABELS = {
   study: "Study",
 };
 
-let notes = [];
+let notes = loadNotes();
+
+function loadNotes() {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  return saved ? JSON.parse(saved) : [];
+}
+
+function saveNotes() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
+}
 
 function render() {
   list.replaceChildren();
 
-  notes.forEach((note) => {
+  const query = searchInput.value.trim().toLowerCase();
+  const visibleNotes = notes.filter((note) =>
+    note.text.toLowerCase().includes(query),
+  );
+
+  visibleNotes.forEach((note) => {
     const card = document.createElement("li");
     card.classList.add("note-card", `category-${note.category}`);
 
@@ -56,6 +73,14 @@ function render() {
     list.appendChild(card);
   });
 
+  if (query !== "" && visibleNotes.length === 0) {
+    const message = document.createElement("li");
+    message.classList.add("empty-state");
+    message.textContent = "No notes match your search.";
+    list.appendChild(message);
+  }
+
+  // The count describes all saved notes, including those hidden by a search.
   if (notes.length === 0) {
     count.textContent = "You have no notes yet.";
   } else if (notes.length === 1) {
@@ -83,11 +108,13 @@ function addNote(text, category) {
     category,
     createdAt: new Date().toLocaleString(),
   });
+  saveNotes();
   render();
 }
 
 function deleteNote(id) {
   notes = notes.filter((note) => note.id !== id);
+  saveNotes();
   render();
 }
 
@@ -120,8 +147,11 @@ form.addEventListener("submit", (event) => {
 clearAllButton.addEventListener("click", () => {
   if (confirm("Delete all notes?")) {
     notes = [];
+    saveNotes();
     render();
   }
 });
+
+searchInput.addEventListener("input", render);
 
 render();
