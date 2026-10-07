@@ -62,8 +62,28 @@ h2 {
 
 #note-form {
   display: flex;
-  align-items: flex-end;
+  align-items: flex-start;
   gap: 12px;
+}
+
+#note-form > button {
+  margin-top: 32px;
+}
+
+#char-count {
+  margin: 0;
+  color: #52627a;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+#char-count.warning {
+  color: #a64c00;
+}
+
+#char-count.over {
+  color: #b42318;
+  font-weight: 700;
 }
 
 .form-field,
@@ -291,6 +311,10 @@ footer p {
   #note-form {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  #note-form > button {
+    margin-top: 0;
   }
 
   .category-field {

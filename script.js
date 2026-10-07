@@ -7,8 +7,11 @@ const count = document.querySelector("#note-count");
 const errorMessage = document.querySelector("#error-message");
 const clearAllButton = document.querySelector("#clear-all");
 const searchInput = document.querySelector("#search-input");
+const charCount = document.querySelector("#char-count");
 
 const STORAGE_KEY = "quicknotes-app";
+const CHARACTER_LIMIT = 200;
+const WARNING_LIMIT = 180;
 
 const CATEGORY_LABELS = {
   personal: "Personal",
@@ -17,6 +20,23 @@ const CATEGORY_LABELS = {
 };
 
 let notes = loadNotes();
+
+function updateCharacterCount() {
+  const characters = input.value.length;
+  let message = `${characters} / ${CHARACTER_LIMIT} characters`;
+
+  if (characters > CHARACTER_LIMIT) {
+    message += " — over limit";
+  } else if (characters === CHARACTER_LIMIT) {
+    message += " — at limit";
+  } else if (characters > WARNING_LIMIT) {
+    message += " — near limit";
+  }
+
+  charCount.textContent = message;
+  charCount.classList.toggle("warning", characters > WARNING_LIMIT);
+  charCount.classList.toggle("over", characters > CHARACTER_LIMIT);
+}
 
 function loadNotes() {
   const saved = localStorage.getItem(STORAGE_KEY);
@@ -129,7 +149,7 @@ form.addEventListener("submit", (event) => {
     return;
   }
 
-  if (text.length > 200) {
+  if (text.length > CHARACTER_LIMIT) {
     errorMessage.textContent = "Notes must be 200 characters or fewer.";
     input.setAttribute("aria-invalid", "true");
     input.focus();
@@ -140,6 +160,7 @@ form.addEventListener("submit", (event) => {
   input.removeAttribute("aria-invalid");
   addNote(text, categorySelect.value);
   input.value = "";
+  updateCharacterCount();
   input.focus();
 });
 
@@ -153,5 +174,7 @@ clearAllButton.addEventListener("click", () => {
 });
 
 searchInput.addEventListener("input", render);
+input.addEventListener("input", updateCharacterCount);
 
 render();
+updateCharacterCount();

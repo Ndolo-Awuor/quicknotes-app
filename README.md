@@ -5,6 +5,7 @@ QuickNotes is a responsive note-taking web app built with HTML, CSS and JavaScri
 ## Features
 
 - Add notes using the Add Note button or Enter.
+- See a live character count beneath the input, with an orange warning above 180 characters and red text above 200.
 - Choose Personal, Work or Study, each with its own colour and label.
 - Display a readable creation date and time on each note card.
 - Reject blank notes and notes longer than 200 characters with clear errors.
